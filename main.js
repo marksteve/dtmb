@@ -10,7 +10,15 @@ var state = {
     update: update
 };
 
-var game = new Phaser.Game(480, 640, Phaser.AUTO, 'screen', state, false, false);
+var game = new Phaser.Game(
+    window.innerWidth,
+    window.innerHeight,
+    Phaser.CANVAS,
+    'screen',
+    state,
+    false,
+    false
+);
 
 function preload() {
     var assets = {
@@ -25,31 +33,47 @@ function preload() {
     });
 }
 
-var birdie, cursors;
+var gameStart = false, gameOver = false, bg, birdie, cursors;
 
 function create() {
+    // Draw bg
+    bg = game.add.graphics(0, 0);
+    bg.beginFill(0xFFFFFF, 1);
+    bg.drawRect(0, 0, game.world.width, game.world.height);
+    bg.endFill();
     // Add birdie
-    birdie = game.add.sprite(game.world.width / 3, 0, 'birdie');
+    birdie = game.add.sprite(game.world.width / 3, game.world.height / 2, 'birdie');
     birdie.anchor.setTo(0.5, 0.5);
     birdie.scale.setTo(2, 2);
-    birdie.body.gravity.y = GRAVITY;
     birdie.body.collideWorldBounds = true;
     birdie.animations.add('fly', [0, 1, 2, 3, 2, 1], 30, true);
     birdie.animations.play('fly');
     // Add controls
-    cursors = game.input.keyboard.createCursorKeys();
+    game.input.onTap.add(flap);
+}
+
+function flap() {
+    if (!gameStart) {
+        birdie.body.gravity.y = GRAVITY;
+        gameStart = true;
+    }
+    if (!gameOver) {
+        birdie.body.velocity.y = -FLAP;
+    }
 }
 
 function update() {
-    // Flap birdie
-    if (cursors.up.isDown) {
-        birdie.body.velocity.y = -FLAP;
-    }
+    // Check game over
+    gameOver = birdie.body.bottom >= this.game.world.bounds.bottom;
     // Make birdie dive
     var dvy = birdie.body.velocity.y - FLAP;
     dvy = dvy < 0 ? 0 : dvy;
-    birdie.angle = 180 * dvy / FLAP;
-    if (birdie.angle < 0 || birdie.angle > 90) {
+    birdie.angle = 180 * dvy / (FLAP * 2);
+    if (
+        gameOver ||
+        birdie.angle < 0 ||
+        birdie.angle > 90
+    ) {
         birdie.angle = 90;
         birdie.animations.stop();
         birdie.frame = 3;
