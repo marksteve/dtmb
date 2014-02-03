@@ -1,5 +1,8 @@
-var GRAVITY = 20;
-var FLAP = 380;
+var DEBUG = false;
+var SPEED = 110;
+var GRAVITY = 15;
+var FLAP = 300;
+var OPENING = 120;
 
 
 (function() {
@@ -7,7 +10,8 @@ var FLAP = 380;
 var state = {
     preload: preload,
     create: create,
-    update: update
+    update: update,
+    render: render
 };
 
 var game = new Phaser.Game(
@@ -23,6 +27,9 @@ function preload() {
         spritesheet: {
             birdie: ['assets/birdie.png', 23, 18]
         },
+        image: {
+            finger: ['assets/finger.png']
+        }
     };
     Object.keys(assets).forEach(function(type) {
         Object.keys(assets[type]).forEach(function(id) {
@@ -31,12 +38,17 @@ function preload() {
     });
 }
 
-var gameStart = false, gameOver = false, bg, birdie, cursors;
+var gameStarted = false,
+    gameOver = false,
+    bg,
+    birdie,
+    fingers,
+    fingersTimer;
 
 function create() {
     // Draw bg
     bg = game.add.graphics(0, 0);
-    bg.beginFill(0xFFFFFF, 1);
+    bg.beginFill(0x99FFCC, 1);
     bg.drawRect(0, 0, game.world.width, game.world.height);
     bg.endFill();
     // Add birdie
@@ -46,37 +58,103 @@ function create() {
     birdie.body.collideWorldBounds = true;
     birdie.animations.add('fly', [0, 1, 2, 3, 2, 1], 30, true);
     birdie.animations.play('fly');
+    // Add fingers
+    fingers = game.add.group();
     // Add controls
     game.input.onTap.add(flap);
 }
 
 function flap() {
-    if (!gameStart) {
+    if (!gameStarted) {
         birdie.body.gravity.y = GRAVITY;
-        gameStart = true;
+        gameStarted = true;
+        fingersTimer = new Phaser.Timer(game);
+        fingersTimer.onEvent.add(spawnFingers);
+        fingersTimer.start();
+        fingersTimer.add(4);
     }
     if (!gameOver) {
         birdie.body.velocity.y = -FLAP;
     }
 }
 
+function spawnFinger(fingerY, flipped) {
+    var finger = fingers.create(
+        game.width - 1,
+        fingerY + (flipped ? -OPENING : OPENING) / 2,
+        'finger'
+    );
+    finger.allowGravity = false;
+    finger.outOfBoundsKill = true;
+
+    // Flip finger! *GASP*
+    finger.scale.setTo(2, flipped ? -2 : 2);
+    finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
+
+    finger.body.velocity.x = -SPEED;
+    return finger;
+}
+
+function spawnFingers() {
+    fingersTimer.stop();
+
+    var fingerY = (game.height / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
+    // Bottom finger
+    spawnFinger(fingerY);
+    // Top finger (flipped)
+    spawnFinger(fingerY, true);
+
+    // Make sure birdie is the star
+    birdie.bringToTop();
+
+    fingersTimer.start();
+    fingersTimer.add(2);
+}
+
+function setGameOver() {
+    gameOver = true;
+    // Stop all fingers
+    fingers.forEachAlive(function(finger) {
+        finger.body.velocity.x = 0;
+    });
+    // Stop spawning fingers
+    fingersTimer.stop();
+}
+
 function update() {
-    // Check game over
-    gameOver = birdie.body.bottom >= this.game.world.bounds.bottom;
-    // Make birdie dive
-    var dvy = birdie.body.velocity.y - FLAP;
-    dvy = dvy < 0 ? 0 : dvy;
-    birdie.angle = 180 * dvy / (FLAP * 2);
-    if (
-        gameOver ||
-        birdie.angle < 0 ||
-        birdie.angle > 90
-    ) {
-        birdie.angle = 90;
-        birdie.animations.stop();
-        birdie.frame = 3;
-    } else {
-        birdie.animations.play('fly');
+    if (gameStarted) {
+        // Check game over
+        game.physics.overlap(birdie, fingers, setGameOver);
+        if (!gameOver && birdie.body.bottom >= this.game.world.bounds.bottom) {
+            // FIXME: Add a floor and check collision there
+            setGameOver();
+        }
+        // Make birdie dive
+        var dvy = birdie.body.velocity.y - FLAP;
+        dvy = dvy < 0 ? 0 : dvy;
+        birdie.angle = 180 * dvy / (FLAP * 2);
+        if (
+            gameOver ||
+            birdie.angle < 0 ||
+            birdie.angle > 90
+        ) {
+            birdie.angle = 90;
+            birdie.animations.stop();
+            birdie.frame = 3;
+        } else {
+            birdie.animations.play('fly');
+        }
+        // Spawn fingers!!!
+        fingersTimer.update();
+    }
+}
+
+function render() {
+    if (DEBUG) {
+        game.debug.renderSpriteBody(birdie);
+        fingers.forEachAlive(function(finger) {
+            game.debug.renderSpriteBody(finger);
+        });
     }
 }
 
