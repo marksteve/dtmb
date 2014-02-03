@@ -15,9 +15,7 @@ var game = new Phaser.Game(
     window.innerHeight,
     Phaser.CANVAS,
     'screen',
-    state,
-    false,
-    false
+    state
 );
 
 function preload() {
