@@ -43,7 +43,7 @@ var game = new Phaser.Game(
 function preload() {
     var assets = {
         spritesheet: {
-            birdie: ['assets/birdie.png', 23, 18]
+            birdie: ['assets/birdie.png', 24, 24]
         },
         image: {
             finger: ['assets/finger.png']
@@ -69,15 +69,15 @@ var gameStarted,
 function create() {
     // Draw bg
     bg = game.add.graphics(0, 0);
-    bg.beginFill(0x99FFCC, 1);
+    bg.beginFill(0xFFFF99, 1);
     bg.drawRect(0, 0, game.world.width, game.world.height);
     bg.endFill();
     // Add birdie
-    birdie = game.add.sprite(game.world.width / 3, game.world.height / 2, 'birdie');
+    birdie = game.add.sprite(0, 0, 'birdie');
     birdie.anchor.setTo(0.5, 0.5);
     birdie.scale.setTo(2, 2);
     birdie.body.collideWorldBounds = true;
-    birdie.animations.add('fly', [0, 1, 2, 3, 2, 1], 30, true);
+    birdie.animations.add('fly', [0, 1, 2, 3], 10, true);
     // Add fingers
     fingers = game.add.group();
     // Add invisible thingies
@@ -85,13 +85,13 @@ function create() {
     // Add score text
     scoreText = game.add.text(
         game.world.width / 2,
-        96,
+        120,
         "",
         {
-            font: '10px "Press Start 2P"',
+            font: '16px "Press Start 2P"',
             fill: '#fff',
             stroke: '#430',
-            strokeThickness: 3,
+            strokeThickness: 4,
             align: 'center'
         }
     );
@@ -105,7 +105,7 @@ function create() {
             font: '8px "Press Start 2P"',
             fill: '#fff',
             stroke: '#430',
-            strokeThickness: 3,
+            strokeThickness: 4,
             align: 'center'
         }
     );
@@ -120,12 +120,13 @@ function reset() {
     gameStarted = false;
     gameOver = false;
     score = 0;
-    scoreText.setText("DON'T TOUCH\nMY BIRDIE");
+    scoreText.setText("DON'T\nTOUCH\nMY\nBIRDIE");
     instText.setText("TAP TO START");
     birdie.reset(game.world.width / 3, game.world.height / 2);
     birdie.animations.play('fly');
     birdie.angle = 0;
     birdie.body.gravity.y = 0;
+    birdie.anchor.x = 0.5;
     fingers.removeAll();
     invs.removeAll();
 }
@@ -214,8 +215,7 @@ function addScore(_, inv) {
 
 function setGameOver() {
     gameOver = true;
-    scoreText.setText("GAME OVER\nSCORE " + score)
-    instText.setText("TAP TO TRY AGAIN");
+    instText.setText("GAME OVER\nTAP TO TRY AGAIN");
     instText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
@@ -265,16 +265,18 @@ function update() {
         });
         // Update timer
         fingersTimer.update();
+    } else {
+        birdie.y = (game.world.height / 2) + 8 * Math.cos(game.time.now / 200);
     }
     // SHAKE TEXT!
     scoreText.scale.setTo(
-        2 + 0.1 * Math.cos(game.time.now / 10),
-        2 + 0.1 * Math.sin(game.time.now / 10)
+        2 + 0.1 * Math.cos(game.time.now / 100),
+        2 + 0.1 * Math.sin(game.time.now / 100)
     );
     // Shake score text
     instText.scale.setTo(
-        2 + 0.1 * Math.sin(game.time.now / 10),
-        2 + 0.1 * Math.cos(game.time.now / 10)
+        2 + 0.1 * Math.sin(game.time.now / 100),
+        2 + 0.1 * Math.cos(game.time.now / 100)
     );
 }
 
