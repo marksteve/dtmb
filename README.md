@@ -4,7 +4,7 @@ A clone of the widely-popular game [Flappy Birdy](http://en.wikipedia.org/wiki/F
 
 ## Note
 
-This was only tested on an iPhone 5. Expect it hilariously fail on other devices.
+This was only tested on an iPhone 5. Expect it to hilariously fail on other devices.
 
 ## License
 
