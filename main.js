@@ -43,10 +43,12 @@ var game = new Phaser.Game(
 function preload() {
     var assets = {
         spritesheet: {
-            birdie: ['assets/birdie.png', 24, 24]
+            birdie: ['assets/birdie.png', 24, 24],
+            clouds: ['assets/clouds.png', 128, 64]
         },
         image: {
-            finger: ['assets/finger.png']
+            finger: ['assets/finger.png'],
+            fence: ['assets/fence.png']
         },
         audio: {
             flap: ['assets/flap.wav'],
@@ -65,32 +67,42 @@ var gameStarted,
     gameOver,
     score,
     bg,
-    birdie,
+    clouds,
     fingers,
+    invs,
+    birdie,
+    fence,
     scoreText,
     instText,
     gameOverText,
     flapSnd,
     scoreSnd,
     hurtSnd,
-    fingersTimer;
+    fingersTimer,
+    cloudsTimer;
 
 function create() {
     // Draw bg
     bg = game.add.graphics(0, 0);
-    bg.beginFill(0xFFFF99, 1);
+    bg.beginFill(0xDDEEFF, 1);
     bg.drawRect(0, 0, game.world.width, game.world.height);
     bg.endFill();
-    // Add birdie
-    birdie = game.add.sprite(0, 0, 'birdie');
-    birdie.anchor.setTo(0.5, 0.5);
-    birdie.body.collideWorldBounds = true;
-    birdie.animations.add('fly', [0, 1, 2, 3], 10, true);
-    birdie.inputEnabled = true;
+    // Add clouds group
+    clouds = game.add.group();
     // Add fingers
     fingers = game.add.group();
     // Add invisible thingies
     invs = game.add.group();
+    // Add birdie
+    birdie = game.add.sprite(0, 0, 'birdie');
+    birdie.anchor.setTo(0.5, 0.5);
+    birdie.animations.add('fly', [0, 1, 2, 3], 10, true);
+    birdie.inputEnabled = true;
+    birdie.body.collideWorldBounds = true;
+    birdie.body.gravity.y = GRAVITY;
+    // Add fence
+    fence = game.add.tileSprite(0, game.world.height - 32, game.world.width, 32, 'fence');
+    fence.tileScale.setTo(2, 2);
     // Add score text
     scoreText = game.add.text(
         game.world.width / 2,
@@ -140,6 +152,11 @@ function create() {
     hurtSnd = game.add.audio('hurt');
     // Add controls
     game.input.onDown.add(flap);
+    // Start clouds timer
+    cloudsTimer = new Phaser.Timer(game);
+    cloudsTimer.onEvent.add(spawnCloud);
+    cloudsTimer.start();
+    cloudsTimer.add(Math.random());
     // RESET!
     reset();
 }
@@ -151,18 +168,18 @@ function reset() {
     scoreText.setText("DON'T\nTOUCH\nMY\nBIRDIE");
     instText.setText("TOUCH TO FLAP\nBIRDIE WINGS");
     gameOverText.renderable = false;
+    birdie.body.allowGravity = false;
+    birdie.angle = 0;
+    birdie.anchor.x = 0.5;
     birdie.reset(game.world.width / 3, game.world.height / 2);
     birdie.scale.setTo(2, 2);
     birdie.animations.play('fly');
-    birdie.angle = 0;
-    birdie.body.gravity.y = 0;
-    birdie.anchor.x = 0.5;
     fingers.removeAll();
     invs.removeAll();
 }
 
 function start() {
-    birdie.body.gravity.y = GRAVITY;
+    birdie.body.allowGravity = true;
     // SPAWN FINGERS!
     fingersTimer = new Phaser.Timer(game);
     fingersTimer.onEvent.add(spawnFingers);
@@ -185,6 +202,26 @@ function flap() {
     }
 }
 
+function spawnCloud() {
+    cloudsTimer.stop();
+
+    var cloudY = Math.random() * game.height / 2;
+    var cloud = clouds.create(
+        game.width,
+        cloudY,
+        'clouds',
+        Math.floor(4 * Math.random())
+    );
+    var cloudScale = 2 + 2 * Math.random();
+    cloud.scale.setTo(cloudScale, cloudScale);
+    cloud.body.allowGravity = false;
+    cloud.body.velocity.x = -SPEED / cloudScale;
+    cloud.anchor.y = 0;
+
+    cloudsTimer.start();
+    cloudsTimer.add(4 * Math.random());
+}
+
 function spawnFinger(fingerY, flipped) {
     var e = 40;
     var o = OPENING + e;
@@ -193,7 +230,7 @@ function spawnFinger(fingerY, flipped) {
         fingerY + (flipped ? -o : o) / 2,
         'finger'
     );
-    finger.allowGravity = false;
+    finger.body.allowGravity = false;
 
     // Flip finger! *GASP*
     finger.scale.setTo(2, flipped ? -2 : 2);
@@ -217,7 +254,7 @@ function spawnFinger(fingerY, flipped) {
 function spawnFingers() {
     fingersTimer.stop();
 
-    var fingerY = (game.height / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 4;
+    var fingerY = ((game.height - 16) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 4;
     // Bottom finger
     var botFinger = spawnFinger(fingerY);
     // Top finger (flipped)
@@ -228,13 +265,10 @@ function spawnFingers() {
         topFinger.x + topFinger.width,
         fingerY - OPENING / 2
     );
-    inv.allowGravity = false;
     inv.width = 2;
     inv.height = OPENING;
+    inv.body.allowGravity = false;
     inv.body.velocity.x = -SPEED;
-
-    // Make sure birdie is the star
-    birdie.bringToTop();
 
     fingersTimer.start();
     fingersTimer.add(1 / SPAWN_RATE);
@@ -333,6 +367,18 @@ function update() {
         2 + 0.1 * Math.cos(game.time.now / 100),
         2 + 0.1 * Math.sin(game.time.now / 100)
     );
+    // Update clouds timer
+    cloudsTimer.update();
+    // Remove offscreen clouds
+    clouds.forEachAlive(function(cloud) {
+        if (cloud.x + cloud.width < game.world.bounds.left) {
+            cloud.kill();
+        }
+    });
+    // Scroll fence
+    if (!gameOver) {
+        fence.tilePosition.x -= game.time.physicsElapsed * SPEED / 2;
+    }
 }
 
 function render() {
