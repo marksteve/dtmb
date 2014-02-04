@@ -85,7 +85,7 @@ function create() {
     // Add score text
     scoreText = game.add.text(
         game.world.width / 2,
-        120,
+        game.world.height / 4,
         "",
         {
             font: '16px "Press Start 2P"',
@@ -99,7 +99,7 @@ function create() {
     // Add instructions text
     instText = game.add.text(
         game.world.width / 2,
-        game.world.height - 160,
+        game.world.height - game.world.height / 4,
         "",
         {
             font: '8px "Press Start 2P"',
