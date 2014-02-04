@@ -63,6 +63,7 @@ var gameStarted,
     birdie,
     fingers,
     scoreText,
+    instText,
     fingersTimer;
 
 function create() {
@@ -84,7 +85,21 @@ function create() {
     // Add score text
     scoreText = game.add.text(
         game.world.width / 2,
-        64,
+        96,
+        "",
+        {
+            font: '10px "Press Start 2P"',
+            fill: '#fff',
+            stroke: '#430',
+            strokeThickness: 3,
+            align: 'center'
+        }
+    );
+    scoreText.anchor.setTo(0.5, 0.5);
+    // Add instructions text
+    instText = game.add.text(
+        game.world.width / 2,
+        game.world.height - 160,
         "",
         {
             font: '8px "Press Start 2P"',
@@ -94,7 +109,7 @@ function create() {
             align: 'center'
         }
     );
-    scoreText.anchor.setTo(0.5, 0.5);
+    instText.anchor.setTo(0.5, 0.5);
     // Add controls
     game.input.onDown.add(onDown);
     // RESET!
@@ -105,7 +120,8 @@ function reset() {
     gameStarted = false;
     gameOver = false;
     score = 0;
-    scoreText.setText("DON'T TOUCH\nMY BIRDIE\n\nTAP TO START");
+    scoreText.setText("DON'T TOUCH\nMY BIRDIE");
+    instText.setText("TAP TO START");
     birdie.reset(game.world.width / 3, game.world.height / 2);
     birdie.animations.play('fly');
     birdie.angle = 0;
@@ -124,6 +140,7 @@ function onDown() {
         fingersTimer.add(4);
         // Show score
         scoreText.setText(score);
+        instText.renderable = false;
         // START!
         gameStarted = true;
     }
@@ -198,7 +215,9 @@ function addScore(_, inv) {
 
 function setGameOver() {
     gameOver = true;
-    scoreText.setText('GAME OVER\nSCORE ' + score + '\n\nTAP TO TRY AGAIN');
+    scoreText.setText("GAME OVER\nSCORE " + score)
+    instText.setText("TAP TO TRY AGAIN");
+    instText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
         finger.body.velocity.x = 0;
@@ -248,10 +267,15 @@ function update() {
         // Update timer
         fingersTimer.update();
     }
-    // Share score text
+    // SHAKE TEXT!
     scoreText.scale.setTo(
         2 + 0.1 * Math.cos(game.time.now / 10),
         2 + 0.1 * Math.sin(game.time.now / 10)
+    );
+    // Shake score text
+    instText.scale.setTo(
+        2 + 0.1 * Math.sin(game.time.now / 10),
+        2 + 0.1 * Math.cos(game.time.now / 10)
     );
 }
 
