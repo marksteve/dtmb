@@ -239,7 +239,7 @@ function setGameOver() {
     instText.renderable = true;
     var hiscore = window.localStorage.getItem('hiscore');
     hiscore = hiscore ? hiscore : score;
-    hiscore = score > hiscore ? score : hiscore;
+    hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
     window.localStorage.setItem('hiscore', score);
     gameOverText.setText("GAMEOVER\n\nHISCORE\n" + hiscore);
     gameOverText.renderable = true;
