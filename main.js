@@ -1,9 +1,9 @@
 var DEBUG = false;
-var SPEED = 160;
+var SPEED = 180;
 var GRAVITY = 20;
 var FLAP = 400;
 var SPAWN_RATE = 1 / 1.2;
-var OPENING = 120;
+var OPENING = 140;
 
 
 WebFontConfig = {
