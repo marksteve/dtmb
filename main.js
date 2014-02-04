@@ -47,6 +47,11 @@ function preload() {
         },
         image: {
             finger: ['assets/finger.png']
+        },
+        audio: {
+            flap: ['assets/flap.wav'],
+            score: ['assets/score.wav'],
+            hurt: ['assets/hurt.wav']
         }
     };
     Object.keys(assets).forEach(function(type) {
@@ -65,6 +70,9 @@ var gameStarted,
     scoreText,
     instText,
     gameOverText,
+    flapSnd,
+    scoreSnd,
+    hurtSnd,
     fingersTimer;
 
 function create() {
@@ -126,6 +134,10 @@ function create() {
     );
     gameOverText.anchor.setTo(0.5, 0.5);
     gameOverText.scale.setTo(2, 2);
+    // Add sounds
+    flapSnd = game.add.audio('flap');
+    scoreSnd = game.add.audio('score');
+    hurtSnd = game.add.audio('hurt');
     // Add controls
     game.input.onDown.add(flap);
     // RESET!
@@ -169,6 +181,7 @@ function flap() {
     }
     if (!gameOver) {
         birdie.body.velocity.y = -FLAP;
+        flapSnd.play();
     }
 }
 
@@ -231,6 +244,7 @@ function addScore(_, inv) {
     invs.remove(inv);
     score += 1;
     scoreText.setText(score);
+    scoreSnd.play();
 }
 
 function setGameOver() {
@@ -254,6 +268,7 @@ function setGameOver() {
     fingersTimer.stop();
     // Make birdie reset the game
     birdie.events.onInputDown.addOnce(reset);
+    hurtSnd.play();
 }
 
 function update() {
