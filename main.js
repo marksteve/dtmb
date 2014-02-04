@@ -292,11 +292,6 @@ function update() {
                 finger.kill();
             }
         });
-        // Shake score text
-        scoreText.scale.setTo(
-            2 + 0.1 * Math.cos(game.time.now / 100),
-            2 + 0.1 * Math.sin(game.time.now / 100)
-        );
         // Update finger timer
         fingersTimer.update();
     } else {
@@ -309,6 +304,11 @@ function update() {
             2 + 0.1 * Math.cos(game.time.now / 100)
         );
     }
+    // Shake score text
+    scoreText.scale.setTo(
+        2 + 0.1 * Math.cos(game.time.now / 100),
+        2 + 0.1 * Math.sin(game.time.now / 100)
+    );
 }
 
 function render() {
