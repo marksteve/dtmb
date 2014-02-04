@@ -1,7 +1,8 @@
 var DEBUG = false;
-var SPEED = 110;
-var GRAVITY = 15;
-var FLAP = 300;
+var SPEED = 160;
+var GRAVITY = 20;
+var FLAP = 400;
+var SPAWN_RATE = 1 / 1.2;
 var OPENING = 120;
 
 
@@ -79,9 +80,11 @@ function flap() {
 }
 
 function spawnFinger(fingerY, flipped) {
+    var e = 40;
+    var o = OPENING + e;
     var finger = fingers.create(
         game.width - 1,
-        fingerY + (flipped ? -OPENING : OPENING) / 2,
+        fingerY + (flipped ? -o : o) / 2,
         'finger'
     );
     finger.allowGravity = false;
@@ -91,6 +94,13 @@ function spawnFinger(fingerY, flipped) {
     finger.scale.setTo(2, flipped ? -2 : 2);
     finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
 
+    if (flipped) {
+        finger.body.velocity.y = e;
+        finger.body.acceleration.y = -e;
+    }  else {
+        finger.body.velocity.y = -e;
+        finger.body.acceleration.y = e;
+    }
     finger.body.velocity.x = -SPEED;
     return finger;
 }
@@ -108,7 +118,7 @@ function spawnFingers() {
     birdie.bringToTop();
 
     fingersTimer.start();
-    fingersTimer.add(2);
+    fingersTimer.add(1 / SPAWN_RATE);
 }
 
 function setGameOver() {
@@ -130,13 +140,12 @@ function update() {
             setGameOver();
         }
         // Make birdie dive
-        var dvy = birdie.body.velocity.y - FLAP;
-        dvy = dvy < 0 ? 0 : dvy;
-        birdie.angle = 180 * dvy / (FLAP * 2);
+        var dvy = FLAP + birdie.body.velocity.y;
+        birdie.angle = (215 * dvy / 4 / FLAP) - 45;
         if (
             gameOver ||
-            birdie.angle < 0 ||
-            birdie.angle > 90
+            birdie.angle > 90 ||
+            birdie.angle < -90
         ) {
             birdie.angle = 90;
             birdie.animations.stop();
