@@ -6,7 +6,22 @@ var SPAWN_RATE = 1 / 1.2;
 var OPENING = 120;
 
 
+WebFontConfig = {
+    google: { families: [ 'Press+Start+2P::latin' ] },
+    active: main
+};
 (function() {
+    var wf = document.createElement('script');
+    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+    wf.type = 'text/javascript';
+    wf.async = 'true';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(wf, s);
+})(); 
+
+
+function main() {
 
 var state = {
     preload: preload,
@@ -20,7 +35,9 @@ var game = new Phaser.Game(
     window.innerHeight,
     Phaser.CANVAS,
     'screen',
-    state
+    state,
+    false,
+    false
 );
 
 function preload() {
@@ -39,11 +56,13 @@ function preload() {
     });
 }
 
-var gameStarted = false,
-    gameOver = false,
+var gameStarted,
+    gameOver,
+    score,
     bg,
     birdie,
     fingers,
+    scoreText,
     fingersTimer;
 
 function create() {
@@ -58,23 +77,59 @@ function create() {
     birdie.scale.setTo(2, 2);
     birdie.body.collideWorldBounds = true;
     birdie.animations.add('fly', [0, 1, 2, 3, 2, 1], 30, true);
-    birdie.animations.play('fly');
     // Add fingers
     fingers = game.add.group();
+    // Add invisible thingies
+    invs = game.add.group();
+    // Add score text
+    scoreText = game.add.text(
+        game.world.width / 2,
+        64,
+        "",
+        {
+            font: '8px "Press Start 2P"',
+            fill: '#fff',
+            stroke: '#430',
+            strokeThickness: 3,
+            align: 'center'
+        }
+    );
+    scoreText.anchor.setTo(0.5, 0.5);
     // Add controls
-    game.input.onTap.add(flap);
+    game.input.onDown.add(onDown);
+    // RESET!
+    reset();
 }
 
-function flap() {
+function reset() {
+    gameStarted = false;
+    gameOver = false;
+    score = 0;
+    scoreText.setText("DON'T TOUCH\nMY BIRDIE\n\nTAP TO START");
+    birdie.reset(game.world.width / 3, game.world.height / 2);
+    birdie.animations.play('fly');
+    birdie.angle = 0;
+    birdie.body.gravity.y = 0;
+    fingers.removeAll();
+    invs.removeAll();
+}
+
+function onDown() {
     if (!gameStarted) {
         birdie.body.gravity.y = GRAVITY;
-        gameStarted = true;
+        // SPAWN FINGERS!
         fingersTimer = new Phaser.Timer(game);
         fingersTimer.onEvent.add(spawnFingers);
         fingersTimer.start();
         fingersTimer.add(4);
+        // Show score
+        scoreText.setText(score);
+        // START!
+        gameStarted = true;
     }
-    if (!gameOver) {
+    if (gameOver) {
+        reset();
+    } else {
         birdie.body.velocity.y = -FLAP;
     }
 }
@@ -94,6 +149,7 @@ function spawnFinger(fingerY, flipped) {
     finger.scale.setTo(2, flipped ? -2 : 2);
     finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
 
+    // Creepy action
     if (flipped) {
         finger.body.velocity.y = e;
         finger.body.acceleration.y = -e;
@@ -101,7 +157,10 @@ function spawnFinger(fingerY, flipped) {
         finger.body.velocity.y = -e;
         finger.body.acceleration.y = e;
     }
+
+    // Move to the left
     finger.body.velocity.x = -SPEED;
+
     return finger;
 }
 
@@ -110,9 +169,19 @@ function spawnFingers() {
 
     var fingerY = (game.height / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
     // Bottom finger
-    spawnFinger(fingerY);
+    var botFinger = spawnFinger(fingerY);
     // Top finger (flipped)
-    spawnFinger(fingerY, true);
+    var topFinger = spawnFinger(fingerY, true);
+
+    // Add invisible thingy
+    var inv = invs.create(
+        topFinger.x + topFinger.width,
+        fingerY - OPENING / 2
+    );
+    inv.allowGravity = false;
+    inv.width = 2;
+    inv.height = OPENING;
+    inv.body.velocity.x = -SPEED;
 
     // Make sure birdie is the star
     birdie.bringToTop();
@@ -121,11 +190,21 @@ function spawnFingers() {
     fingersTimer.add(1 / SPAWN_RATE);
 }
 
+function addScore(_, inv) {
+    inv.kill();
+    score += 1;
+    scoreText.setText(score);
+}
+
 function setGameOver() {
     gameOver = true;
+    scoreText.setText('GAME OVER\nSCORE ' + score + '\n\nTAP TO TRY AGAIN');
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
         finger.body.velocity.x = 0;
+    });
+    invs.forEachAlive(function(inv) {
+        inv.body.velocity.x = 0;
     });
     // Stop spawning fingers
     fingersTimer.stop();
@@ -133,11 +212,15 @@ function setGameOver() {
 
 function update() {
     if (gameStarted) {
-        // Check game over
-        game.physics.overlap(birdie, fingers, setGameOver);
-        if (!gameOver && birdie.body.bottom >= this.game.world.bounds.bottom) {
-            // FIXME: Add a floor and check collision there
-            setGameOver();
+        if (!gameOver) {
+            // Check game over
+            game.physics.overlap(birdie, fingers, setGameOver);
+            if (!gameOver && birdie.body.bottom >= game.world.bounds.bottom) {
+                // FIXME: Add a floor and check collision there
+                setGameOver();
+            }
+            // Add score
+            game.physics.overlap(birdie, invs, addScore);
         }
         // Make birdie dive
         var dvy = FLAP + birdie.body.velocity.y;
@@ -153,9 +236,20 @@ function update() {
         } else {
             birdie.animations.play('fly');
         }
-        // Spawn fingers!!!
+        // Manually kill invisible thingies
+        invs.forEachAlive(function(inv) {
+            if (inv.x < game.world.bounds.left) {
+                inv.kill();
+            }
+        });
+        // Update timer
         fingersTimer.update();
     }
+    // Share score text
+    scoreText.scale.setTo(
+        2 + 0.1 * Math.cos(game.time.now / 10),
+        2 + 0.1 * Math.sin(game.time.now / 10)
+    );
 }
 
 function render() {
@@ -164,7 +258,10 @@ function render() {
         fingers.forEachAlive(function(finger) {
             game.debug.renderSpriteBody(finger);
         });
+        invs.forEachAlive(function(inv) {
+            game.debug.renderSpriteBody(inv);
+        });
     }
 }
 
-})();
+};
