@@ -234,7 +234,11 @@ function setGameOver() {
     gameOver = true;
     instText.setText("TAP TO TRY AGAIN");
     instText.renderable = true;
-    gameOverText.setText("GAME OVER");
+    var hiscore = window.localStorage.getItem('hiscore');
+    hiscore = hiscore ? hiscore : score;
+    hiscore = score > hiscore ? score : hiscore;
+    window.localStorage.setItem('hiscore', score);
+    gameOverText.setText("GAMEOVER\n\nHISCORE\n" + hiscore);
     gameOverText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
