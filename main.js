@@ -224,7 +224,10 @@ function update() {
         }
         // Make birdie dive
         var dvy = FLAP + birdie.body.velocity.y;
-        birdie.angle = (215 * dvy / 4 / FLAP) - 45;
+        birdie.angle = (90 * dvy / FLAP) - 180;
+        if (birdie.angle < -15) {
+            birdie.angle = -15;
+        }
         if (
             gameOver ||
             birdie.angle > 90 ||
