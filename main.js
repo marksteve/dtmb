@@ -78,6 +78,7 @@ function create() {
     birdie.anchor.setTo(0.5, 0.5);
     birdie.body.collideWorldBounds = true;
     birdie.animations.add('fly', [0, 1, 2, 3], 10, true);
+    birdie.inputEnabled = true;
     // Add fingers
     fingers = game.add.group();
     // Add invisible thingies
@@ -126,7 +127,7 @@ function create() {
     gameOverText.anchor.setTo(0.5, 0.5);
     gameOverText.scale.setTo(2, 2);
     // Add controls
-    game.input.onDown.add(onDown);
+    game.input.onDown.add(flap);
     // RESET!
     reset();
 }
@@ -148,23 +149,25 @@ function reset() {
     invs.removeAll();
 }
 
-function onDown() {
+function start() {
+    birdie.body.gravity.y = GRAVITY;
+    // SPAWN FINGERS!
+    fingersTimer = new Phaser.Timer(game);
+    fingersTimer.onEvent.add(spawnFingers);
+    fingersTimer.start();
+    fingersTimer.add(3);
+    // Show score
+    scoreText.setText(score);
+    instText.renderable = false;
+    // START!
+    gameStarted = true;
+}
+
+function flap() {
     if (!gameStarted) {
-        birdie.body.gravity.y = GRAVITY;
-        // SPAWN FINGERS!
-        fingersTimer = new Phaser.Timer(game);
-        fingersTimer.onEvent.add(spawnFingers);
-        fingersTimer.start();
-        fingersTimer.add(3);
-        // Show score
-        scoreText.setText(score);
-        instText.renderable = false;
-        // START!
-        gameStarted = true;
+        start();
     }
-    if (gameOver) {
-        reset();
-    } else {
+    if (!gameOver) {
         birdie.body.velocity.y = -FLAP;
     }
 }
@@ -232,7 +235,7 @@ function addScore(_, inv) {
 
 function setGameOver() {
     gameOver = true;
-    instText.setText("TAP TO TRY AGAIN");
+    instText.setText("TAP BIRDIE\nTO TRY AGAIN");
     instText.renderable = true;
     var hiscore = window.localStorage.getItem('hiscore');
     hiscore = hiscore ? hiscore : score;
@@ -249,6 +252,8 @@ function setGameOver() {
     });
     // Stop spawning fingers
     fingersTimer.stop();
+    // Make birdie reset the game
+    birdie.events.onInputDown.addOnce(reset);
 }
 
 function update() {
