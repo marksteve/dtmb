@@ -155,12 +155,11 @@ function spawnFinger(fingerY, flipped) {
     var e = 40;
     var o = OPENING + e;
     var finger = fingers.create(
-        game.width - 1,
+        game.width,
         fingerY + (flipped ? -o : o) / 2,
         'finger'
     );
     finger.allowGravity = false;
-    finger.outOfBoundsKill = true;
 
     // Flip finger! *GASP*
     finger.scale.setTo(2, flipped ? -2 : 2);
@@ -208,7 +207,7 @@ function spawnFingers() {
 }
 
 function addScore(_, inv) {
-    inv.kill();
+    invs.remove(inv);
     score += 1;
     scoreText.setText(score);
 }
@@ -222,7 +221,7 @@ function setGameOver() {
     fingers.forEachAlive(function(finger) {
         finger.body.velocity.x = 0;
     });
-    invs.forEachAlive(function(inv) {
+    invs.forEach(function(inv) {
         inv.body.velocity.x = 0;
     });
     // Stop spawning fingers
@@ -258,10 +257,10 @@ function update() {
         } else {
             birdie.animations.play('fly');
         }
-        // Manually kill invisible thingies
-        invs.forEachAlive(function(inv) {
-            if (inv.x < game.world.bounds.left) {
-                inv.kill();
+        // Remove offscreen fingers
+        fingers.forEachAlive(function(finger) {
+            if (finger.x + finger.width < game.world.bounds.left) {
+                finger.kill();
             }
         });
         // Update timer
@@ -285,7 +284,7 @@ function render() {
         fingers.forEachAlive(function(finger) {
             game.debug.renderSpriteBody(finger);
         });
-        invs.forEachAlive(function(inv) {
+        invs.forEach(function(inv) {
             game.debug.renderSpriteBody(inv);
         });
     }
