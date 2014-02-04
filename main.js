@@ -240,7 +240,7 @@ function setGameOver() {
     var hiscore = window.localStorage.getItem('hiscore');
     hiscore = hiscore ? hiscore : score;
     hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
-    window.localStorage.setItem('hiscore', score);
+    window.localStorage.setItem('hiscore', hiscore);
     gameOverText.setText("GAMEOVER\n\nHISCORE\n" + hiscore);
     gameOverText.renderable = true;
     // Stop all fingers
