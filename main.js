@@ -230,8 +230,9 @@ function spawnCloud() {
 }
 
 function spawnFinger(fingerY, flipped) {
-    var e = 40;
-    var o = OPENING + e;
+    // var e = 40;
+    // var o = OPENING + e;
+    var o = OPENING;
     var finger = fingers.create(
         game.width,
         fingerY + (flipped ? -o : o) / 2,
@@ -243,14 +244,14 @@ function spawnFinger(fingerY, flipped) {
     finger.scale.setTo(2, flipped ? -2 : 2);
     finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
 
-    // Creepy action
-    if (flipped) {
-        finger.body.velocity.y = e;
-        finger.body.acceleration.y = -e;
-    }  else {
-        finger.body.velocity.y = -e;
-        finger.body.acceleration.y = e;
-    }
+    // // Creepy action
+    // if (flipped) {
+    //     finger.body.velocity.y = e;
+    //     finger.body.acceleration.y = -e;
+    // }  else {
+    //     finger.body.velocity.y = -e;
+    //     finger.body.acceleration.y = e;
+    // }
 
     // Move to the left
     finger.body.velocity.x = -SPEED;
