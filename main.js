@@ -30,11 +30,13 @@ var state = {
     render: render
 };
 
+var parent = document.querySelector('#screen');
+
 var game = new Phaser.Game(
-    window.innerWidth,
-    window.innerHeight,
+    parent.clientWidth,
+    parent.clientHeight,
     Phaser.CANVAS,
-    'screen',
+    parent,
     state,
     false,
     false
