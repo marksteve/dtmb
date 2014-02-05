@@ -244,10 +244,14 @@ function spawnCloud() {
     cloudsTimer.add(4 * Math.random());
 }
 
+function o() {
+    return OPENING + 60 * ((score > 50 ? 50 : 50 - score) / 50);
+}
+
 function spawnFinger(fingerY, flipped) {
     var finger = fingers.create(
         game.width,
-        fingerY + (flipped ? -OPENING : OPENING) / 2,
+        fingerY + (flipped ? -o() : o()) / 2,
         'finger'
     );
     finger.body.allowGravity = false;
@@ -265,7 +269,7 @@ function spawnFinger(fingerY, flipped) {
 function spawnFingers() {
     fingersTimer.stop();
 
-    var fingerY = ((game.height - 16 - OPENING / 2) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
+    var fingerY = ((game.height - 16 - o() / 2) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
     // Bottom finger
     var botFinger = spawnFinger(fingerY);
     // Top finger (flipped)
