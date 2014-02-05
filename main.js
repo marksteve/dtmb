@@ -1,6 +1,6 @@
 var DEBUG = false;
 var SPEED = 180;
-var GRAVITY = 20;
+var GRAVITY = 18;
 var FLAP = 420;
 var SPAWN_RATE = 1 / 1.2;
 var OPENING = 144;
@@ -69,6 +69,7 @@ var gameStarted,
     gameOver,
     score,
     bg,
+    credits,
     clouds,
     fingers,
     invs,
@@ -94,6 +95,18 @@ function create() {
     bg.beginFill(0xDDEEFF, 1);
     bg.drawRect(0, 0, game.world.width, game.world.height);
     bg.endFill();
+    // Credits 'yo
+    credits = game.add.text(
+        game.world.width / 2,
+        10,
+        'marksteve.com/dtmb\n@themarksteve',
+        {
+            font: '8px "Press Start 2P"',
+            fill: '#fff',
+            align: 'center'
+        }
+    );
+    credits.anchor.x = 0.5;
     // Add clouds group
     clouds = game.add.group();
     // Add fingers
@@ -172,13 +185,13 @@ function reset() {
     gameStarted = false;
     gameOver = false;
     score = 0;
+    credits.renderable = true;
     scoreText.setText("DON'T\nTOUCH\nMY\nBIRDIE");
     instText.setText("TOUCH TO FLAP\nBIRDIE WINGS");
     gameOverText.renderable = false;
     birdie.body.allowGravity = false;
     birdie.angle = 0;
-    birdie.anchor.x = 0.5;
-    birdie.reset(game.world.width / 3, game.world.height / 2);
+    birdie.reset(game.world.width / 4, game.world.height / 2);
     birdie.scale.setTo(2, 2);
     birdie.animations.play('fly');
     fingers.removeAll();
@@ -186,12 +199,13 @@ function reset() {
 }
 
 function start() {
+    credits.renderable = false;
     birdie.body.allowGravity = true;
     // SPAWN FINGERS!
     fingersTimer = new Phaser.Timer(game);
     fingersTimer.onEvent.add(spawnFingers);
     fingersTimer.start();
-    fingersTimer.add(3);
+    fingersTimer.add(2);
     // Show score
     scoreText.setText(score);
     instText.renderable = false;
@@ -220,6 +234,7 @@ function spawnCloud() {
         Math.floor(4 * Math.random())
     );
     var cloudScale = 2 + 2 * Math.random();
+    cloud.alpha = 2 / cloudScale;
     cloud.scale.setTo(cloudScale, cloudScale);
     cloud.body.allowGravity = false;
     cloud.body.velocity.x = -SPEED / cloudScale;
@@ -230,12 +245,9 @@ function spawnCloud() {
 }
 
 function spawnFinger(fingerY, flipped) {
-    // var e = 40;
-    // var o = OPENING + e;
-    var o = OPENING;
     var finger = fingers.create(
         game.width,
-        fingerY + (flipped ? -o : o) / 2,
+        fingerY + (flipped ? -OPENING : OPENING) / 2,
         'finger'
     );
     finger.body.allowGravity = false;
@@ -243,15 +255,6 @@ function spawnFinger(fingerY, flipped) {
     // Flip finger! *GASP*
     finger.scale.setTo(2, flipped ? -2 : 2);
     finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
-
-    // // Creepy action
-    // if (flipped) {
-    //     finger.body.velocity.y = e;
-    //     finger.body.acceleration.y = -e;
-    // }  else {
-    //     finger.body.velocity.y = -e;
-    //     finger.body.acceleration.y = e;
-    // }
 
     // Move to the left
     finger.body.velocity.x = -SPEED;
@@ -262,19 +265,16 @@ function spawnFinger(fingerY, flipped) {
 function spawnFingers() {
     fingersTimer.stop();
 
-    var fingerY = ((game.height - 16) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
+    var fingerY = ((game.height - 16 - OPENING / 2) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
     // Bottom finger
     var botFinger = spawnFinger(fingerY);
     // Top finger (flipped)
     var topFinger = spawnFinger(fingerY, true);
 
     // Add invisible thingy
-    var inv = invs.create(
-        topFinger.x + topFinger.width,
-        fingerY - OPENING / 2
-    );
+    var inv = invs.create(topFinger.x + topFinger.width, 0);
     inv.width = 2;
-    inv.height = OPENING;
+    inv.height = game.world.height;
     inv.body.allowGravity = false;
     inv.body.velocity.x = -SPEED;
 
@@ -318,8 +318,8 @@ function update() {
         // Make birdie dive
         var dvy = FLAP + birdie.body.velocity.y;
         birdie.angle = (90 * dvy / FLAP) - 180;
-        if (birdie.angle < -15) {
-            birdie.angle = -15;
+        if (birdie.angle < -30) {
+            birdie.angle = -30;
         }
         if (
             gameOver ||
@@ -346,7 +346,6 @@ function update() {
             // Check game over
             game.physics.overlap(birdie, fingers, setGameOver);
             if (!gameOver && birdie.body.bottom >= game.world.bounds.bottom) {
-                // FIXME: Add a floor and check collision there
                 setGameOver();
             }
             // Add score
