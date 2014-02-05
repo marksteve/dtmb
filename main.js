@@ -33,8 +33,8 @@ var state = {
 var parent = document.querySelector('#screen');
 
 var game = new Phaser.Game(
-    parent.clientWidth,
-    parent.clientHeight,
+    0,
+    0,
     Phaser.CANVAS,
     parent,
     state,
@@ -84,6 +84,11 @@ var gameStarted,
     cloudsTimer;
 
 function create() {
+    // Set world dimensions
+    var screenWidth = parent.clientWidth > window.innerWidth ? window.innerWidth : parent.clientWidth;
+    var screenHeight = parent.clientHeight > window.innerHeight ? window.innerHeight : parent.clientHeight;
+    game.world.width = screenWidth;
+    game.world.height = screenHeight;
     // Draw bg
     bg = game.add.graphics(0, 0);
     bg.beginFill(0xDDEEFF, 1);
