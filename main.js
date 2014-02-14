@@ -5,27 +5,26 @@ var FLAP = 420;
 var SPAWN_RATE = 1 / 1.2;
 var OPENING = 144;
 
-
-WebFontConfig = {
-    google: { families: [ 'Press+Start+2P::latin' ] },
-    active: main
-};
-(function() {
-    var wf = document.createElement('script');
-    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-    wf.type = 'text/javascript';
-    wf.async = 'true';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(wf, s);
-})(); 
-
 // Load in Clay.io API
 var Clay = Clay || {};
 Clay.gameKey = "dtmb";
 Clay.readyFunctions = [];
 Clay.ready = function( fn ) {
     Clay.readyFunctions.push( fn );
+    // Load game
+    WebFontConfig = {
+        google: { families: [ 'Press+Start+2P::latin' ] },
+        active: main
+    };
+    (function() {
+        var wf = document.createElement('script');
+        wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+          '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+        wf.type = 'text/javascript';
+        wf.async = 'true';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(wf, s);
+    })(); 
 };
 ( function() {
     var clay = document.createElement("script"); clay.async = true;
