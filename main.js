@@ -468,9 +468,12 @@ function update() {
                     birdie.scale.y * 1.2
                 );
             }
-            // Shake game over text
-            highScoreText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
+            highScoreText.scale.setTo(
+                1 + 0.1 * Math.sin(game.time.now / 100),
+                1 + 0.1 * Math.cos(game.time.now / 100)
+            );
             postScoreText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
+            kikThisText.angle = Math.random() * 5 * Math.sin(game.time.now / 100);
         } else {
             // Check game over
             game.physics.overlap(birdie, towers, setGameOver);
