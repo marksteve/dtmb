@@ -63,7 +63,6 @@ function clayLoaded() {
         ]
     };
     Clay.UI.Menu.init(options);
-    
     leaderboard = new Clay.Leaderboard({ id: 2797 });
 }
 Clay.ready(clayLoaded);
@@ -73,9 +72,11 @@ function showScores() {
         leaderboard.show({ best: true });
     }
 }
+
 function kikThis() {
-    Clay.Kik.post( { message: 'I just scored ' + score + ' in Snappy Bird! Think you can beat my score?', title: 'Snappy Bird!' } );
+    Clay.Kik.post( { message: 'I just scored ' + score + ' in Heavy Bird! Think you can beat my score?', title: 'Heavy Bird!' } );
 }
+
 function postScore() {
     if( postingScore ) // skip if it's already trying to post the score...
         return;
@@ -105,6 +106,7 @@ function postScore() {
     }
     	
 }
+
 function preload() {
     var assets = {
         spritesheet: {
@@ -112,7 +114,7 @@ function preload() {
             clouds: ['assets/clouds.png', 128, 64]
         },
         image: {
-            finger: ['assets/finger.png'],
+            tower: ['assets/tower.png'],
             fence: ['assets/fence.png']
         },
         audio: {
@@ -134,13 +136,13 @@ var gameStarted,
     bg,
     credits,
     clouds,
-    fingers,
+    towers,
     invs,
     birdie,
     fence,
     scoreText,
     instText,
-    gameOverText,
+    highScoreText,
     kikThisText,
     kikThisClickArea,
     postScoreClickArea,
@@ -149,7 +151,7 @@ var gameStarted,
     flapSnd,
     scoreSnd,
     hurtSnd,
-    fingersTimer,
+    towersTimer,
     cloudsTimer;
 
 function create() {
@@ -160,7 +162,7 @@ function create() {
     game.world.height = screenHeight;
     // Draw bg
     bg = game.add.graphics(0, 0);
-    bg.beginFill(0xDDEEFF, 1);
+    bg.beginFill(0xCCEEFF, 1);
     bg.drawRect(0, 0, game.world.width, game.world.height);
     bg.endFill();
     // Credits 'yo
@@ -177,8 +179,8 @@ function create() {
     credits.anchor.x = 0.5;
     // Add clouds group
     clouds = game.add.group();
-    // Add fingers
-    fingers = game.add.group();
+    // Add towers
+    towers = game.add.group();
     // Add invisible thingies
     invs = game.add.group();
     // Add birdie
@@ -194,7 +196,7 @@ function create() {
     // Add score text
     scoreText = game.add.text(
         game.world.width / 2,
-        game.world.height / 8,
+        game.world.height / 5,
         "",
         {
             font: '32px "Press Start 2P"',
@@ -220,25 +222,23 @@ function create() {
     );
     instText.anchor.setTo(0.5, 0.5);
     // Add game over text
-    gameOverText = game.add.text(
+    highScoreText = game.add.text(
         game.world.width / 2,
-        game.world.height / 4,
+        game.world.height / 3,
         "",
         {
-            font: '32px "Press Start 2P"',
+            font: '24px "Press Start 2P"',
             fill: '#fff',
             stroke: '#430',
             strokeThickness: 8,
             align: 'center'
         }
     );
-    gameOverText.anchor.setTo(0.5, 0.5);
-    //gameOverText.scale.setTo(2, 2);
-    
+    highScoreText.anchor.setTo(0.5, 0.5);
     
     // Add kik this text (hidden until game is over)
     postScoreText = game.add.text(
-        game.world.width / 4,
+        game.world.width / (Clay.Environment.platform == 'kik' ?  4 : 2),
         game.world.height / 2,
         "",
         {
@@ -252,7 +252,6 @@ function create() {
     postScoreText.setText("POST\nSCORE!");
     postScoreText.anchor.setTo(0.5, 0.5);
     postScoreText.renderable = false;
-    //postScoreText.scale.setTo(2, 2);
     // So we can have clickable text... we check if the mousedown/touch event is within this rectangle inside flap()
     postScoreClickArea = new Phaser.Rectangle(postScoreText.x - postScoreText.width / 2, postScoreText.y - postScoreText.height / 2, postScoreText.width, postScoreText.height);
     
@@ -272,10 +271,8 @@ function create() {
     kikThisText.setText("KIK\nTHIS!");
     kikThisText.anchor.setTo(0.5, 0.5);
     kikThisText.renderable = false;
-    //kikThisText.scale.setTo(2, 2);
     // So we can have clickable text... we check if the mousedown/touch event is within this rectangle inside flap()
     kikThisClickArea = new Phaser.Rectangle(kikThisText.x - kikThisText.width / 2, kikThisText.y - kikThisText.height / 2, kikThisText.width, kikThisText.height);
-    
     
     // Add sounds
     flapSnd = game.add.audio('flap');
@@ -297,9 +294,9 @@ function reset() {
     gameOver = false;
     score = 0;
     credits.renderable = true;
-    scoreText.setText("SNAPPY\nBIRD");
-    instText.setText("TOUCH TO FLAP\nBIRDIE WINGS");
-    gameOverText.renderable = false;
+    scoreText.setText("HEAVY\nBIRD");
+    instText.setText("TOUCH TO\nFLAP WINGS");
+    highScoreText.renderable = false;
     postScoreText.renderable = false;
     kikThisText.renderable = false;
     birdie.body.allowGravity = false;
@@ -307,7 +304,7 @@ function reset() {
     birdie.reset(game.world.width / 4, game.world.height / 2);
     birdie.scale.setTo(2, 2);
     birdie.animations.play('fly');
-    fingers.removeAll();
+    towers.removeAll();
     invs.removeAll();
 }
 
@@ -315,10 +312,10 @@ function start() {
     credits.renderable = false;
     birdie.body.allowGravity = true;
     // SPAWN FINGERS!
-    fingersTimer = new Phaser.Timer(game);
-    fingersTimer.onEvent.add(spawnFingers);
-    fingersTimer.start();
-    fingersTimer.add(2);
+    towersTimer = new Phaser.Timer(game);
+    towersTimer.onEvent.add(spawnTowers);
+    towersTimer.start();
+    towersTimer.add(2);
     // Show score
     scoreText.setText(score);
     instText.renderable = false;
@@ -370,42 +367,42 @@ function o() {
     return OPENING + 60 * ((score > 50 ? 50 : 50 - score) / 50);
 }
 
-function spawnFinger(fingerY, flipped) {
-    var finger = fingers.create(
+function spawnTower(towerY, flipped) {
+    var tower = towers.create(
         game.width,
-        fingerY + (flipped ? -o() : o()) / 2,
-        'finger'
+        towerY + (flipped ? -o() : o()) / 2,
+        'tower'
     );
-    finger.body.allowGravity = false;
+    tower.body.allowGravity = false;
 
-    // Flip finger! *GASP*
-    finger.scale.setTo(2, flipped ? -2 : 2);
-    finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
+    // Flip tower! *GASP*
+    tower.scale.setTo(2, flipped ? -2 : 2);
+    tower.body.offset.y = flipped ? -tower.body.height * 2 : 0;
 
     // Move to the left
-    finger.body.velocity.x = -SPEED;
+    tower.body.velocity.x = -SPEED;
 
-    return finger;
+    return tower;
 }
 
-function spawnFingers() {
-    fingersTimer.stop();
+function spawnTowers() {
+    towersTimer.stop();
 
-    var fingerY = ((game.height - 16 - o() / 2) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
-    // Bottom finger
-    var botFinger = spawnFinger(fingerY);
-    // Top finger (flipped)
-    var topFinger = spawnFinger(fingerY, true);
+    var towerY = ((game.height - 16 - o() / 2) / 2) + (Math.random() > 0.5 ? -1 : 1) * Math.random() * game.height / 6;
+    // Bottom tower
+    var botTower = spawnTower(towerY);
+    // Top tower (flipped)
+    var topTower = spawnTower(towerY, true);
 
     // Add invisible thingy
-    var inv = invs.create(topFinger.x + topFinger.width, 0);
+    var inv = invs.create(topTower.x + topTower.width, 0);
     inv.width = 2;
     inv.height = game.world.height;
     inv.body.allowGravity = false;
     inv.body.velocity.x = -SPEED;
 
-    fingersTimer.start();
-    fingersTimer.add(1 / SPAWN_RATE);
+    towersTimer.start();
+    towersTimer.add(1 / SPAWN_RATE);
 }
 
 function addScore(_, inv) {
@@ -417,30 +414,29 @@ function addScore(_, inv) {
 
 function setGameOver() {
     gameOver = true;
-    instText.setText("TOUCH BIRDIE\nTO TRY AGAIN");
+    instText.setText("TOUCH BIRD\nTO TRY AGAIN");
     instText.renderable = true;
     var hiscore = window.localStorage.getItem('hiscore');
     hiscore = hiscore ? hiscore : score;
     hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
     window.localStorage.setItem('hiscore', hiscore);
-    // removed GAMEOVER\n\n
-    gameOverText.setText("HISCORE\n" + hiscore);
-    gameOverText.renderable = true;
+    highScoreText.setText("HIGHSCORE\n" + hiscore);
+    highScoreText.renderable = true;
     
     postScoreText.renderable = true;
     if (Clay.Environment.platform == 'kik') {
         kikThisText.renderable = true;
     }
     
-    // Stop all fingers
-    fingers.forEachAlive(function(finger) {
-        finger.body.velocity.x = 0;
+    // Stop all towers
+    towers.forEachAlive(function(tower) {
+        tower.body.velocity.x = 0;
     });
     invs.forEach(function(inv) {
         inv.body.velocity.x = 0;
     });
-    // Stop spawning fingers
-    fingersTimer.stop();
+    // Stop spawning towers
+    towersTimer.stop();
     // Make birdie reset the game
     birdie.events.onInputDown.addOnce(reset);
     hurtSnd.play();
@@ -474,24 +470,25 @@ function update() {
                 );
             }
             // Shake game over text
-            gameOverText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
+            highScoreText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
+            postScoreText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
         } else {
             // Check game over
-            game.physics.overlap(birdie, fingers, setGameOver);
+            game.physics.overlap(birdie, towers, setGameOver);
             if (!gameOver && birdie.body.bottom >= game.world.bounds.bottom) {
                 setGameOver();
             }
             // Add score
             game.physics.overlap(birdie, invs, addScore);
         }
-        // Remove offscreen fingers
-        fingers.forEachAlive(function(finger) {
-            if (finger.x + finger.width < game.world.bounds.left) {
-                finger.kill();
+        // Remove offscreen towers
+        towers.forEachAlive(function(tower) {
+            if (tower.x + tower.width < game.world.bounds.left) {
+                tower.kill();
             }
         });
-        // Update finger timer
-        fingersTimer.update();
+        // Update tower timer
+        towersTimer.update();
     } else {
         birdie.y = (game.world.height / 2) + 8 * Math.cos(game.time.now / 200);
     }
@@ -524,8 +521,8 @@ function update() {
 function render() {
     if (DEBUG) {
         game.debug.renderSpriteBody(birdie);
-        fingers.forEachAlive(function(finger) {
-            game.debug.renderSpriteBody(finger);
+        towers.forEachAlive(function(tower) {
+            game.debug.renderSpriteBody(tower);
         });
         invs.forEach(function(inv) {
             game.debug.renderSpriteBody(inv);
