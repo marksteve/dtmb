@@ -32,6 +32,9 @@ Clay.ready = function( fn ) {
     var tag = document.getElementsByTagName("script")[0]; tag.parentNode.insertBefore(clay, tag);
 } )();
 
+if(typeof cards !== 'undefined' && cards.kik)
+    window.location.href = 'card://flirtybird.clay.io';
+
 function main() {
 
 var state = {
