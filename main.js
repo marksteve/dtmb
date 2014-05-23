@@ -18,7 +18,7 @@ WebFontConfig = {
     wf.async = 'true';
     var s = document.getElementsByTagName('script')[0];
     s.parentNode.insertBefore(wf, s);
-})(); 
+})();
 
 
 function main() {
@@ -33,8 +33,8 @@ var state = {
 var parent = document.querySelector('#screen');
 
 var game = new Phaser.Game(
-    0,
-    0,
+    320,
+    568,
     Phaser.CANVAS,
     parent,
     state,
@@ -85,11 +85,8 @@ var gameStarted,
     cloudsTimer;
 
 function create() {
-    // Set world dimensions
-    var screenWidth = parent.clientWidth > window.innerWidth ? window.innerWidth : parent.clientWidth;
-    var screenHeight = parent.clientHeight > window.innerHeight ? window.innerHeight : parent.clientHeight;
-    game.world.width = screenWidth;
-    game.world.height = screenHeight;
+    game.stage.scaleMode = Phaser.StageScaleMode.SHOW_ALL;
+    game.stage.scale.setScreenSize(true);
     // Draw bg
     bg = game.add.graphics(0, 0);
     bg.beginFill(0xDDEEFF, 1);
