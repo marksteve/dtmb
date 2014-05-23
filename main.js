@@ -5,23 +5,24 @@ var FLAP = 420;
 var SPAWN_RATE = 1 / 1.2;
 var OPENING = 144;
 
+function init(parent) {
 
-WebFontConfig = {
-    google: { families: [ 'Press+Start+2P::latin' ] },
-    active: main
-};
-(function() {
-    var wf = document.createElement('script');
-    wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-      '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-    wf.type = 'text/javascript';
-    wf.async = 'true';
-    var s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(wf, s);
-})();
-
-
-function main() {
+var slides = [
+    "Hi, I'm Steve",
+    "I'm a web developer\nat Insync",
+    "I am not a game developer",
+    "This is my \"first\" game",
+    "I learned programming\nto develop games",
+    "Back then I was learning\nJavascript with Sphere",
+    "It was an RPG game IDE\nthat used JS for scripting",
+    "Kefka's Revenge was written in Sphere",
+    "But then websites\nbecame a thing",
+    "Got bored one afternoon",
+    "\"I think I can write\na clone of that\"",
+    "Phaser\nhttp://phaser.io",
+    "Show you how I made it",
+    "Add something to it"
+];
 
 var state = {
     preload: preload,
@@ -30,10 +31,8 @@ var state = {
     render: render
 };
 
-var parent = document.querySelector('#screen');
-
 var game = new Phaser.Game(
-    320,
+    1010,
     568,
     Phaser.CANVAS,
     parent,
@@ -82,7 +81,8 @@ var gameStarted,
     scoreSnd,
     hurtSnd,
     fingersTimer,
-    cloudsTimer;
+    cloudsTimer,
+    gameOvers = 0;
 
 function create() {
     game.stage.scaleMode = Phaser.StageScaleMode.SHOW_ALL;
@@ -298,7 +298,7 @@ function setGameOver() {
     hiscore = hiscore ? hiscore : score;
     hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
     window.localStorage.setItem('hiscore', hiscore);
-    gameOverText.setText("GAMEOVER\n\nHISCORE\n" + hiscore);
+    gameOverText.setText(slides[gameOvers]);
     gameOverText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
@@ -312,6 +312,7 @@ function setGameOver() {
     // Make birdie reset the game
     birdie.events.onInputDown.addOnce(reset);
     hurtSnd.play();
+    gameOvers++;
 }
 
 function update() {
@@ -342,7 +343,7 @@ function update() {
                 );
             }
             // Shake game over text
-            gameOverText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
+            // gameOverText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
         } else {
             // Check game over
             game.physics.overlap(birdie, fingers, setGameOver);
