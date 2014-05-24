@@ -414,7 +414,6 @@ function onKeyDown(e) { }
 var pressTime = 0;
 function onKeyUp(e) {
     if (Phaser.Keyboard.SPACEBAR == e.keyCode) {
-        console.log(game.time.now - pressTime);
         if (game.time.now - pressTime < 200) {
             cobraMode = 1000;
         } else {
