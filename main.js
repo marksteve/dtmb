@@ -15,7 +15,7 @@ var slides = [
     "I learned programming\nto develop games",
     "Back then I was learning\nJavascript with Sphere",
     "It was an RPG game IDE\nthat used JS for scripting",
-    "Kefka's Revenge was written in Sphere",
+    "Kefka's Revenge was\nmade with Sphere",
     "But then websites\nbecame a thing",
     "Got bored one afternoon",
     "\"I think I can write\na clone of that\"",
