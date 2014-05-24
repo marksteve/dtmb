@@ -44,7 +44,7 @@ var game = new Phaser.Game(
 function preload() {
     var assets = {
         spritesheet: {
-            birdie: ['assets/birdie.png', 24, 24],
+            birdie: ['assets/birdie.png', 48, 24],
             clouds: ['assets/clouds.png', 128, 64]
         },
         image: {
@@ -82,6 +82,7 @@ var gameStarted,
     hurtSnd,
     fingersTimer,
     cloudsTimer,
+    cobraMode = 0,
     gameOvers = 0;
 
 function create() {
@@ -114,6 +115,7 @@ function create() {
     birdie = game.add.sprite(0, 0, 'birdie');
     birdie.anchor.setTo(0.5, 0.5);
     birdie.animations.add('fly', [0, 1, 2, 3], 10, true);
+    birdie.animations.add('cobra', [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], 60, false);
     birdie.inputEnabled = true;
     birdie.body.collideWorldBounds = true;
     birdie.body.gravity.y = GRAVITY;
@@ -169,6 +171,7 @@ function create() {
     hurtSnd = game.add.audio('hurt');
     // Add controls
     game.input.onDown.add(flap);
+    game.input.keyboard.addCallbacks(game, onKeyDown, onKeyUp);
     // Start clouds timer
     cloudsTimer = new Phaser.Timer(game);
     cloudsTimer.onEvent.add(spawnCloud);
@@ -332,7 +335,7 @@ function update() {
             birdie.animations.stop();
             birdie.frame = 3;
         } else {
-            birdie.animations.play('fly');
+            birdie.animations.play(cobraMode > 0 ? 'cobra' : 'fly');
         }
         // Birdie is DEAD!
         if (gameOver) {
@@ -346,9 +349,11 @@ function update() {
             // gameOverText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
         } else {
             // Check game over
-            game.physics.overlap(birdie, fingers, setGameOver);
-            if (!gameOver && birdie.body.bottom >= game.world.bounds.bottom) {
-                setGameOver();
+            if (cobraMode < 1) {
+                game.physics.overlap(birdie, fingers, setGameOver);
+                if (!gameOver && birdie.body.bottom >= game.world.bounds.bottom) {
+                    setGameOver();
+                }
             }
             // Add score
             game.physics.overlap(birdie, invs, addScore);
@@ -388,6 +393,8 @@ function update() {
     if (!gameOver) {
         fence.tilePosition.x -= game.time.physicsElapsed * SPEED / 2;
     }
+    // Decrease cobra mode
+    cobraMode -= game.time.physicsElapsed * SPEED * 5;
 }
 
 function render() {
@@ -399,6 +406,21 @@ function render() {
         invs.forEach(function(inv) {
             game.debug.renderSpriteBody(inv);
         });
+    }
+}
+
+function onKeyDown(e) { }
+
+var pressTime = 0;
+function onKeyUp(e) {
+    if (Phaser.Keyboard.SPACEBAR == e.keyCode) {
+        console.log(game.time.now - pressTime);
+        if (game.time.now - pressTime < 200) {
+            cobraMode = 1000;
+        } else {
+            flap();
+        }
+        pressTime = game.time.now;
     }
 }
 
