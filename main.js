@@ -301,7 +301,7 @@ function setGameOver() {
     hiscore = hiscore ? hiscore : score;
     hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
     window.localStorage.setItem('hiscore', hiscore);
-    gameOverText.setText(slides[gameOvers]);
+    gameOverText.setText(slides[gameOvers]||'');
     gameOverText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
