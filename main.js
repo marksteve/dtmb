@@ -7,23 +7,6 @@ var OPENING = 144;
 
 function init(parent) {
 
-var slides = [
-    "Hi, I'm Steve",
-    "I'm a web developer\nat Insync",
-    "I am not a game developer",
-    "This is my \"first\" game",
-    "I learned programming\nto develop games",
-    "Back then I was learning\nJavascript with Sphere",
-    "It was an RPG game IDE\nthat used JS for scripting",
-    "Kefka's Revenge was\nmade with Sphere",
-    "But then websites\nbecame a thing",
-    "Got bored one afternoon",
-    "\"I think I can write\na clone of that\"",
-    "Phaser\nhttp://phaser.io",
-    "Show you how I made it",
-    "Add something to it"
-];
-
 var state = {
     preload: preload,
     create: create,
@@ -301,7 +284,7 @@ function setGameOver() {
     hiscore = hiscore ? hiscore : score;
     hiscore = score > parseInt(hiscore, 10) ? score : hiscore;
     window.localStorage.setItem('hiscore', hiscore);
-    gameOverText.setText(slides[gameOvers]);
+    gameOverText.setText("Game over");
     gameOverText.renderable = true;
     // Stop all fingers
     fingers.forEachAlive(function(finger) {
@@ -346,7 +329,7 @@ function update() {
                 );
             }
             // Shake game over text
-            // gameOverText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
+            gameOverText.angle = Math.random() * 5 * Math.cos(game.time.now / 100);
         } else {
             // Check game over
             if (cobraMode < 1) {
