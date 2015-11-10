@@ -15,8 +15,8 @@ var state = {
 };
 
 var game = new Phaser.Game(
-    800,
-    600,
+    480,
+    700,
     Phaser.CANVAS,
     parent,
     state,
