@@ -1,8 +1,8 @@
 # Don't Touch My Birdie
 
-A clone of the widely-popular game [Flappy Birdy](http://en.wikipedia.org/wiki/Flappy_Bird) created using the [Phaser framework](http://phaser.io/).
+A clone of the widely-popular game [Flappy Bird](http://en.wikipedia.org/wiki/Flappy_Bird) created using the [Phaser framework](http://phaser.io/).
 
-[Open in your mobile browser](http://marksteve.com/dtmb)
+[Open in your mobile browser](https://marksteve.com/dtmb)
 
 ![Screenshots](screenshots.png)
 
