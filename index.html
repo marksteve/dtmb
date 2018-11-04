@@ -1,31 +1,17 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
-        <title>DTMB</title>
+        <title>Flappy Axe</title>
         <meta name="viewport" content="width=device-width, user-scalable=no">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <link rel="apple-touch-icon" href="assets/icon.png">
-        <link rel="apple-touch-icon" sizes="120x120" href="assets/icon-120.png">
-        <style>
-            body {
-                background: #430;
-                margin: 0;
-                padding: 0;
-                text-align: center;
-                overflow: hidden;
-            }
-            #screen {
-                display: inline-block;
-            }
-            </style>
-        </style>
+        <link rel="stylesheet" href="assets/style.css">
     </head>
+	
     <body>
         <div id="screen"></div>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.15.1/phaser.js"></script>
-        <script src="main.js"></script>
+        <script src="scripts/phaser.min.js"></script>
+        <script src="scripts/main.js"></script>
         <script>
-
             function start() {
                 init(document.querySelector('#screen'));
             }
@@ -43,7 +29,6 @@
                 var s = document.getElementsByTagName('script')[0];
                 s.parentNode.insertBefore(wf, s);
             })();
-
         </script>
     </body>
 </html>

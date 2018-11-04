@@ -1,0 +1,11 @@
+body {
+    background: #430;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    overflow: hidden;
+}
+
+#screen {
+    display: inline-block;
+}
