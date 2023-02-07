@@ -175,7 +175,7 @@ function reset() {
     birdie.body.allowGravity = false;
     birdie.angle = 0;
     birdie.reset(game.world.width / 4, game.world.height / 2);
-    birdie.scale.setTo(2, 2);
+    birdie.scale.setTo(1.5, 1.5);
     birdie.animations.play('fly');
     fingers.removeAll();
     invs.removeAll();
