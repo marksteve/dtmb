@@ -240,7 +240,7 @@ function spawnFinger(fingerY, flipped) {
     finger.body.allowGravity = false;
 
     // Flip finger! *GASP*
-    finger.scale.setTo(2, flipped ? -2 : 2);
+    finger.scale.setTo(1.5, flipped ? -1.5 : 1.5);
     finger.body.offset.y = flipped ? -finger.body.height * 2 : 0;
 
     // Move to the left
